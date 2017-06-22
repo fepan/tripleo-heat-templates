@@ -61,6 +61,15 @@ resources:
       DefaultPasswords: {get_param: DefaultPasswords}
       EndpointMap: {get_param: EndpointMap}
 
+  NeutronMl2Base:
+    type: ./neutron-plugin-ml2.yaml
+    properties:
+      ServiceNetMap: {get_param: ServiceNetMap}
+      DefaultPasswords: {get_param: DefaultPasswords}
+      EndpointMap: {get_param: EndpointMap}
+      RoleName: {get_param: RoleName}
+      RoleParameters: {get_param: RoleParameters}
+
 outputs:
   role_data:
     description: Role data for the VTS ML2 Plugin.
@@ -73,6 +82,7 @@ outputs:
         vts::vts_ip: {get_param: VTS_IP}
         vts::vmm_id: {get_param: VTS_VMM_ID}
         map_merge:
+          - get_attr: [NeutronBase, role_data, config_settings]
           - get_attr: [NeutronMl2Base, role_data, config_settings]
       step_config: |
         include ::tripleo::profile::base::neutron::plugins::ml2
