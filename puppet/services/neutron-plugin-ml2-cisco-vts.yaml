@@ -1,0 +1,79 @@
+heat_template_version: pike
+
+description: >
+  VTS Controller Settings for Neutron ML2 Plugin.
+
+parameters:
+  VTSUsername:
+    default: 'admin'
+    description: The username for the VTS server.
+    type: string
+  VTSPassword:
+    default: 'admin'
+    type: string
+    description: The password for the VTS server.
+    hidden: true
+  VTS_IP:
+    description: VTS IP address
+    type: string
+    default: ''
+  VTS_VMM_ID:
+    description: VMM ID used on VTS
+    type: string
+    default: ''
+  VTSServerPort:
+    description: Port of the VTS Server
+    type: number
+    default: 8888
+  VTS_MechanismDrivers:
+    description: Mechanism drivers to use for VTS
+    type: string
+    default: 'sriovnicswitch, cisco_vts'
+  EndpointMap:
+    default: {}
+    description: Mapping of service endpoint -> protocol. Typically set
+                 via parameter_defaults in the resource registry.
+    type: json
+  ServiceNetMap:
+    default: {}
+    description: Mapping of service_name -> network name. Typically set
+                 via parameter_defaults in the resource registry.  This
+                 mapping overrides those in ServiceNetMapDefaults.
+    type: json
+  DefaultPasswords:
+    default: {}
+    type: json
+  RoleName:
+    default: ''
+    description: Role name on which the service is applied
+    type: string
+  RoleParameters:
+    default: {}
+    description: Parameters specific to the role
+    type: json
+
+resources:
+
+  NeutronBase:
+    type: ./neutron-base.yaml
+    properties:
+      ServiceNetMap: {get_param: ServiceNetMap}
+      DefaultPasswords: {get_param: DefaultPasswords}
+      EndpointMap: {get_param: EndpointMap}
+
+outputs:
+  role_data:
+    description: Role data for the VTS ML2 Plugin.
+    value:
+      service_name: cisco_vts_plugin
+      config_settings:
+        vts::vts_port: {get_param: VTSServerPort}
+        vts::username: {get_param: VTSUsername}
+        vts::password: {get_param: VTSPassword}
+        vts::vts_ip: {get_param: VTS_IP}
+        vts::vmm_id: {get_param: VTS_VMM_ID}
+        map_merge:
+          - get_attr: [NeutronMl2Base, role_data, config_settings]
+      step_config: |
+        include tripleo::profile::base::neutron::agents:vts
+

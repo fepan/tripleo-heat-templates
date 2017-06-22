@@ -1,0 +1,12 @@
+# A Heat environment file which can be used to enable OVN
+# extensions, configured via puppet
+resource_registry:
+  OS::TripleO::Services::NeutronOvsAgent: OS::Heat::None
+  OS::TripleO::Services::NeutronCorePlugin: ../puppet/services/neutron-plugin-ml2-cisco-vts.yaml
+# Disabling Neutron services that overlap with VTS
+  OS::TripleO::Services::ComputeNeutronOvsAgent: OS::Heat::None
+
+parameter_defaults:
+  NeutronMechanismDrivers: 'sriovnicswitch, cisco_vts'
+  NeutronTypeDrivers: 'vxlan,vlan,flat'
+  NeutronServicePlugins: 'cisco_vts_router'
