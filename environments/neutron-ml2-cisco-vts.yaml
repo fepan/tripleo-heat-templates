@@ -1,18 +1,27 @@
 # A Heat environment file which can be used to enable OVN
 # extensions, configured via puppet
 resource_registry:
-  OS::TripleO::Services::NeutronOvsAgent: OS::Heat::None
-#  OS::TripleO::Services::NeutronCorePlugin: ../puppet/services/neutron-plugin-ml2-cisco-vts.yaml
-  OS::TripleO::Services::VTS_Agent: ../puppet/services/neutron-plugin-ml2-cisco-vts.yaml
+  OS::TripleO::Services::NeutronCorePlugin: OS::TripleO::Services::NeutronCorePluginVTS
+  # TODO: Do we need compute nodes to have vts plugin config too? If not we can set
+  # ComputeNeutronCorePlugin to OS::Heat::None here. If we need different configs
+  # on compute nodes than controller nodes, then we need to create another service
+  # file in puppet directory for compute and link it here.
+  OS::TripleO::Services::ComputeNeutronCorePlugin: OS::TripleO::Services::NeutronCorePluginVTS
+
+  # We'll add VTS agent when its service is implemented.
+  #OS::TripleO::Services::VTS_Agent: ../puppet/services/neutron-plugin-ml2-cisco-vts.yaml
 # Disabling Neutron services that overlap with VTS
+  OS::TripleO::Services::NeutronOvsAgent: OS::Heat::None
   OS::TripleO::Services::ComputeNeutronOvsAgent: OS::Heat::None
+  # TODO: Should we disable Neutron's L3 agent?
+  OS::TripleO::Services::NeutronL3Agent: OS::Heat::None
 
 parameter_defaults:
-  VTSUsername: 'admin'
-  VTSPassword: ''
-  VTS_IP: ''
-  VTS_VMM_ID: ''
+  #VTSUsername: 'admin'
+  #VTSPassword: ''
+  #VTSServer: '192.168.0.1'
+  #VTSVMMID: ''
   NeutronCorePlugin: 'neutron.plugins.ml2.plugin.Ml2Plugin'
-  NeutronMechanismDrivers: 'sriovnicswitch, cisco_vts'
+  NeutronMechanismDrivers: 'sriovnicswitch,cisco_vts'
   NeutronTypeDrivers: 'vxlan,vlan,flat'
   NeutronServicePlugins: 'cisco_vts_router'

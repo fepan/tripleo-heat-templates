@@ -13,22 +13,17 @@ parameters:
     type: string
     description: The password for the VTS server.
     hidden: true
-  VTS_IP:
-    description: VTS IP address
+  VTSServer:
+    description: VTS Server IP address
     type: string
-    default: ''
-  VTS_VMM_ID:
+  VTSVMMID:
     description: VMM ID used on VTS
     type: string
     default: ''
-  VTSServerPort:
+  VTSPort:
     description: Port of the VTS Server
     type: number
     default: 8888
-  VTS_MechanismDrivers:
-    description: Mechanism drivers to use for VTS
-    type: string
-    default: 'sriovnicswitch, cisco_vts'
   EndpointMap:
     default: {}
     description: Mapping of service endpoint -> protocol. Typically set
@@ -54,13 +49,6 @@ parameters:
 
 resources:
 
-  NeutronBase:
-    type: ./neutron-base.yaml
-    properties:
-      ServiceNetMap: {get_param: ServiceNetMap}
-      DefaultPasswords: {get_param: DefaultPasswords}
-      EndpointMap: {get_param: EndpointMap}
-
   NeutronMl2Base:
     type: ./neutron-plugin-ml2.yaml
     properties:
@@ -74,16 +62,14 @@ outputs:
   role_data:
     description: Role data for the VTS ML2 Plugin.
     value:
-      service_name: cisco_vts_plugin
+      service_name: neutron_plugin_ml2_cisco_vts
       config_settings:
-        vts::vts_port: {get_param: VTSServerPort}
-        vts::username: {get_param: VTSUsername}
-        vts::password: {get_param: VTSPassword}
-        vts::vts_ip: {get_param: VTS_IP}
-        vts::vmm_id: {get_param: VTS_VMM_ID}
         map_merge:
-          - get_attr: [NeutronBase, role_data, config_settings]
           - get_attr: [NeutronMl2Base, role_data, config_settings]
+          - tripleo::profile::base::neutron::plugins::ml2::vts::vts_ip: {get_param: VTSServer}
+            tripleo::profile::base::neutron::plugins::ml2::vts::vts_port: {get_param: VTSPort}
+            neutron::plugins::ml2::cisco::vts::username: {get_param: VTSUsername}
+            neutron::plugins::ml2::cisco::vts::password: {get_param: VTSPassword}
+            neutron::plugins::ml2::cisco::vts::vmm_id: {get_param: VTSVMMID}
       step_config: |
         include ::tripleo::profile::base::neutron::plugins::ml2
-
